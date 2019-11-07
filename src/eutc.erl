@@ -2,10 +2,9 @@
 
 %% API Exports
 -export([
-	 timestamp/0,
-	 iso8601/0,
-	 rfc3339/0
-	]).
+         timestamp/0,
+         now/0
+        ]).
 
 -on_load(init/0).
 
@@ -20,28 +19,19 @@
 %%
 %% @end
 -spec timestamp() -> Timestamp
-	when
-	Timestamp :: integer().
+        when
+        Timestamp :: integer().
 timestamp() ->
-	timestamp_nif().
+        timestamp_nif().
 
 %% @doc iso8601/0 current UTC time as RFC 3339 and ISO 8601 formatted string
 %%
 %% @end
--spec iso8601() -> DateTimeString
-	when
-	DateTimeString :: binary().
-iso8601() ->
-	iso8601_nif().
-
-%% @doc iso8601/0 current UTC time as RFC 3339 and ISO 8601 formatted string
-%%
-%% @end
--spec rfc3339() -> DateTimeString
-	when
-	DateTimeString :: binary().
-rfc3339() ->
-	iso8601().
+-spec now() -> DateTimeString
+        when
+        DateTimeString :: binary().
+now() ->
+        now_nif().
 
 %%====================================================================
 %% NIFS
@@ -49,7 +39,7 @@ rfc3339() ->
 timestamp_nif() ->
     not_loaded(?LINE).
 
-iso8601_nif() ->
+now_nif() ->
     not_loaded(?LINE).
 
 %%====================================================================
@@ -70,4 +60,18 @@ init() ->
     erlang:load_nif(SoName, 0).
 
 not_loaded(Line) ->
-	    exit({not_loaded, [{module, ?MODULE}, {line, Line}]}).
+            exit({not_loaded, [{module, ?MODULE}, {line, Line}]}).
+
+%%=========================================================================
+%% Unit Test Suite
+%%=========================================================================
+-ifdef(TEST).
+
+-include_lib("eunit/include/eunit.hrl").
+
+timestamp_test_() ->
+  [
+   ?_assertEqual(1, eutc:now())
+  ].
+
+-endif.

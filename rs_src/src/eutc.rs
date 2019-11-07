@@ -23,7 +23,7 @@ rustler_export_nifs! {
     "eutc", // module name
     [
         ("timestamp", 0, timestamp),
-        ("iso8601", 0, iso8601),
+        ("now", 0, now),
     ], // nif functions
     Some(on_load) // on_load callback
 }
@@ -36,15 +36,14 @@ fn on_load(_env: Env, _info: Term) -> bool {
 fn timestamp<'a>(env: Env<'a>, _args: &[Term<'a>]) -> NifResult<Term<'a>> {
     let now: DateTime<Utc> = Utc::now();
 
-    let ts: i64 = now.timestamp();
-    let nanosec: u32 = now.timestamp_subsec_nanos();
+    let ts: i64 = now.timestamp_nanos();
 
-    Ok((ts*1000000000 + nanosec as i64).encode(env))
+    Ok((ts).encode(env))
 }
 
-pub fn iso8601<'a>(env: Env<'a>, _args: &[Term<'a>]) -> NifResult<Term<'a>> {
+pub fn now<'a>(env: Env<'a>, _args: &[Term<'a>]) -> NifResult<Term<'a>> {
     let now: DateTime<Utc> = Utc::now();
-    let now_str: String = now.to_rfc3339_opts(SecondsFormat::Secs, true);
-        
+    let now_str: String = now.to_rfc3339_opts(SecondsFormat::AutoSi, true);
+
     Ok(now_str.encode(env))
 }
