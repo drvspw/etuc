@@ -46,18 +46,21 @@ now_nif() ->
 %%%% Internal functions
 %%%%%====================================================================
 init() ->
-    SoName = case code:priv_dir(?APPNAME) of
-       {error, bad_name} ->
-          case filelib:is_dir(filename:join(["..", priv])) of
-            true ->
-              filename:join(["..", priv, ?LIBNAME]);
-            _ ->
-              filename:join([priv, ?LIBNAME])
-          end;
-       Dir ->
-          filename:join(Dir, ?LIBNAME)
-    end,
-    erlang:load_nif(SoName, 0).
+  PrivDir = code:priv_dir(?APPNAME),
+  LibFile = lib_file(PrivDir, ?LIBNAME),
+  erlang:load_nif(LibFile, 0).
+
+lib_file({error, bad_name}, LibName) ->
+  case filelib:is_dir(filename:join(["..", priv])) of
+    true ->
+      filename:join(["..", priv, LibName]);
+    _ ->
+      filename:join([priv, LibName])
+  end;
+
+lib_file(PrivDir, LibName) ->
+  filename:join(PrivDir, LibName).
+
 
 not_loaded(Line) ->
             exit({not_loaded, [{module, ?MODULE}, {line, Line}]}).
@@ -71,7 +74,8 @@ not_loaded(Line) ->
 
 timestamp_test_() ->
   [
-   ?_assertEqual(1, eutc:now())
+   ?_assertEqual(true, is_integer(eutc:timestamp())),
+   ?_assertEqual(true, is_binary(eutc:now()))
   ].
 
 -endif.
