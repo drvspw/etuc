@@ -1,0 +1,73 @@
+version: 2.1
+
+## Configuration
+master_filter: &master_filter
+  branches:
+    only: master
+
+## Common steps
+build_steps: &build_steps
+  executor: eutc_executor
+  steps:
+    - checkout
+
+    - run:
+        name: Build eutc
+        command: |
+          rebar3 xref
+
+    - run:
+        name: Test etuc
+        command: |
+          rebar3 eunit
+
+release_steps: &release_steps
+  executor: ghr_executor
+  steps:
+    - checkout
+
+    - run:
+        name: Push Release
+        command: |
+          go get github.com/tcnksm/ghr
+          VERSION=$(./.package.sh version)
+          ghr \
+            -t ${GITHUB_TOKEN} \
+            -u ${CIRCLE_PROJECT_USERNAME} \
+            -r ${CIRCLE_PROJECT_REPONAME} \
+            -c ${CIRCLE_SHA1} \
+            -delete \
+            ${VERSION} ./README.md
+
+executors:
+  eutc_executor:
+    docker:
+      - image: drvspw/eutc-build
+    working_directory: ~/eutc
+
+  ghr_executor:
+    docker:
+      - image: circleci/golang
+    working_directory: ~/eutc
+
+jobs:
+  build:
+    <<: *build_steps
+
+  publish-github-release:
+    <<: *release_steps
+
+# Workflow
+workflows:
+  version: 2
+  eutc-workflow:
+    jobs:
+      - build:
+          context: drvspw
+
+      - publish-github-release:
+          context: drvspw
+          filters:
+            <<: *master_filter
+          requires:
+            - build
