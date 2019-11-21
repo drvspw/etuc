@@ -6,9 +6,8 @@ authors = []
 [lib]
 name = "eutc"
 path = "src/eutc.rs"
-crate-type = ["dylib"]
+crate-type = ["cdylib"]
 
 [dependencies]
-rustler = "0.19.0"
-lazy_static = "1.2.0"
+rustler = "0.21.0"
 chrono = "0.4"

@@ -19,28 +19,30 @@
 %%
 %% @end
 -spec timestamp() -> Timestamp
-        when
-        Timestamp :: integer().
+                       when
+    Timestamp :: integer().
 timestamp() ->
-        timestamp_nif().
+  timestamp_nif().
 
-%% @doc iso8601/0 current UTC time as RFC 3339 and ISO 8601 formatted string
+%% @doc now/0 current UTC time
 %%
 %% @end
--spec now() -> DateTimeString
-        when
-        DateTimeString :: binary().
+-spec now() -> #{seconds => Sec, nanos => Nanos, iso8601 => DateTimeString}
+                 when
+    Sec :: integer(),
+    Nanos :: integer(),
+    DateTimeString :: binary().
 now() ->
-        now_nif().
+  now_nif().
 
 %%====================================================================
 %% NIFS
 %%====================================================================
 timestamp_nif() ->
-    not_loaded(?LINE).
+  not_loaded(?LINE).
 
 now_nif() ->
-    not_loaded(?LINE).
+  not_loaded(?LINE).
 
 %%====================================================================
 %%%% Internal functions
@@ -63,7 +65,7 @@ lib_file(PrivDir, LibName) ->
 
 
 not_loaded(Line) ->
-            exit({not_loaded, [{module, ?MODULE}, {line, Line}]}).
+  exit({not_loaded, [{module, ?MODULE}, {line, Line}]}).
 
 %%=========================================================================
 %% Unit Test Suite
@@ -75,7 +77,7 @@ not_loaded(Line) ->
 timestamp_test_() ->
   [
    ?_assertEqual(true, is_integer(eutc:timestamp())),
-   ?_assertEqual(true, is_binary(eutc:now()))
+   ?_assertEqual(true, is_map(eutc:now()))
   ].
 
 -endif.
