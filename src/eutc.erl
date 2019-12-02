@@ -2,6 +2,8 @@
 
 %% API Exports
 -export([
+         system_time/0,
+         datetime/0,
          timestamp/0,
          now/0
         ]).
@@ -15,33 +17,43 @@
 %% API functions - NIFS
 %%====================================================================
 
-%% @doc timestamp/0 utc timestamp in nanoseconds
+%% @doc timestamp/0 utc time os:timestamp() format
 %%
 %% @end
 -spec timestamp() -> Timestamp
                        when
-    Timestamp :: integer().
+    Timestamp :: os:timestamp().
 timestamp() ->
-  timestamp_nif().
+  not_loaded(?LINE).
+
+%% @doc datetime/0 utc time os:datetime() format
+%%
+%% @end
+-spec datetime() -> DateTime
+                       when
+    DateTime :: calendar:datetime().
+datetime() ->
+  not_loaded(?LINE).
+
+%% @doc system_time/0 utc system_time in nanoseconds
+%%
+%% @end
+-spec system_time() -> System_Time
+                       when
+    System_Time :: integer().
+system_time() ->
+  not_loaded(?LINE).
 
 %% @doc now/0 current UTC time
 %%
 %% @end
--spec now() -> #{seconds => Sec, nanos => Nanos, iso8601 => DateTimeString}
+-spec now() -> #{seconds => Sec, nanos => Nanos, datetime => DateTime, iso8601 => DateTimeString}
                  when
     Sec :: integer(),
     Nanos :: integer(),
+    DateTime :: calendar:datetime(),
     DateTimeString :: binary().
 now() ->
-  now_nif().
-
-%%====================================================================
-%% NIFS
-%%====================================================================
-timestamp_nif() ->
-  not_loaded(?LINE).
-
-now_nif() ->
   not_loaded(?LINE).
 
 %%====================================================================
@@ -74,10 +86,13 @@ not_loaded(Line) ->
 
 -include_lib("eunit/include/eunit.hrl").
 
-timestamp_test_() ->
+eutc_test_() ->
   [
-   ?_assertEqual(true, is_integer(eutc:timestamp())),
-   ?_assertEqual(true, is_map(eutc:now()))
+   ?_assertEqual(true, is_integer(eutc:system_time())),
+   ?_assertEqual(true, is_map(eutc:now())),
+   ?_assertMatch(#{datetime := {{_, _, _},{_, _, _}}}, eutc:now()),
+   ?_assertMatch({{_, _, _},{_, _, _}}, eutc:datetime()),
+   ?_assertMatch({_, _, _}, eutc:timestamp())
   ].
 
 -endif.
