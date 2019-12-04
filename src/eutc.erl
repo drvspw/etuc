@@ -5,7 +5,8 @@
          system_time/0,
          datetime/0,
          timestamp/0,
-         now/0
+         now/0,
+         parse_iso8601/1
         ]).
 
 -on_load(init/0).
@@ -56,6 +57,19 @@ system_time() ->
 now() ->
   not_loaded(?LINE).
 
+%% @doc parse_iso8601/0 current UTC time
+%%
+%% @end
+-spec parse_iso8601(DateTimeStr) -> #{seconds => Sec, nanos => Nanos, datetime => DateTime, iso8601 => DateTimeString}
+                 when
+    DateTimeStr :: iodata(),
+    Sec :: integer(),
+    Nanos :: integer(),
+    DateTime :: calendar:datetime(),
+    DateTimeString :: binary().
+parse_iso8601(_) ->
+  not_loaded(?LINE).
+
 %%====================================================================
 %%%% Internal functions
 %%%%%====================================================================
@@ -92,7 +106,14 @@ eutc_test_() ->
    ?_assertEqual(true, is_map(eutc:now())),
    ?_assertMatch(#{datetime := {{_, _, _},{_, _, _}}}, eutc:now()),
    ?_assertMatch({{_, _, _},{_, _, _}}, eutc:datetime()),
-   ?_assertMatch({_, _, _}, eutc:timestamp())
+   ?_assertMatch({_, _, _}, eutc:timestamp()),
+   ?_assertMatch(#{iso8601 := <<"2019-12-04T03:12:24.304988624Z">>}, eutc:parse_iso8601(<<"2019-12-04T03:12:24.304988624Z">>)),
+   ?_assertMatch(#{iso8601 := <<"2019-12-04T03:12:24.304988624Z">>}, eutc:parse_iso8601("2019-12-04T03:12:24.304988624Z")),
+   ?_assertMatch(#{datetime := {{2019,12,4},{3,12,24}}}, eutc:parse_iso8601(<<"2019-12-04T03:12:24.304988624Z">>)),
+   ?_assertMatch(#{nanos := 304988624,seconds := 1575429144}, eutc:parse_iso8601(<<"2019-12-04T03:12:24.304988624Z">>)),
+   ?_assertMatch(#{nanos := 0,seconds := 1575429144}, eutc:parse_iso8601(<<"2019-12-04T03:12:24Z">>)),
+   ?_assertMatch(#{nanos := 0,seconds := 1575432543}, eutc:parse_iso8601(<<"Wed, 04 Dec 2019 04:09:03 +0000">>))
+
   ].
 
 -endif.
