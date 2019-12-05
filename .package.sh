@@ -20,9 +20,22 @@ function sedeasy {
     sed -i "s/$1/$(echo $2 | sed -e 's/[\/&]/\\&/g')/g" $3
 }
 
+repo() {
+    echo -n "${PROJECT}"
+}
+
+owner() {
+    echo -n "${PROJECT_GROUP}"
+}
+
 branch() {
     # Check if branch name comes for drone
     local BRANCH=${CIRCLE_BRANCH}
+
+    # Get for github env variable
+    if [ "X$BRANCH" == X ]; then
+	BRANCH=$(echo -n $GITHUB_REF | sed 's/refs\/heads\///g')
+    fi
 
     # Finally take from git
     if [ "X$BRANCH" == X ]; then
@@ -76,6 +89,14 @@ main() {
 
 	branch)
 	    branch
+	    ;;
+
+	repo)
+	    repo
+	    ;;
+
+	owner)
+	    owner
 	    ;;
 
 	tag)
