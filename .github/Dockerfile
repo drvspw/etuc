@@ -1,6 +1,6 @@
 # Dockerfile for eutc
 
-FROM circleci/erlang:21.3.8.2
+FROM erlang:21.3.8.2
 MAINTAINER Venkatakumar Srinivasan
 
 LABEL version="1.0"
@@ -15,8 +15,7 @@ ENV CARGO_HOME /opt/rust
 RUN mkdir /opt/rust && \
     echo "export RUSTUP_HOME=/opt/rust" >> /etc/profile.d/rust.sh && \
     echo "CARGO_HOME=/opt/rust" >> /etc/profile.d/rust.sh && \
-    curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path && \
-    chown -R circleci:circleci /opt/rust
+    curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path
 
 RUN cd /usr/local/bin/ 	&& \
 	for f in `ls /opt/rust/bin/*`; do echo "ln -s $f $(basename $f)" | /bin/bash; done
@@ -31,5 +30,3 @@ RUN apt-get update  && \
 # Cleanup
 RUN apt-get update && \
 	rm -rf /var/lib/apt/lists/*
-
-USER circleci
